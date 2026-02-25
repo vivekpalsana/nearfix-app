@@ -11,11 +11,11 @@ import {
     StatusBar,
     StyleSheet,
     Text,
-    TextInput,
     TouchableOpacity,
     View
 } from 'react-native';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+import { AuthInput } from '../components/AuthInput';
 
 const { width } = Dimensions.get('window');
 
@@ -81,42 +81,30 @@ export default function AuthScreen() {
                     {/* Form Section */}
                     <Animated.View entering={FadeInDown.delay(400)} style={styles.formContainer}>
                         {!isLogin && (
-                            <View style={styles.inputWrapper}>
-                                <Ionicons name="person-outline" size={20} color="#94A3B8" style={styles.inputIcon} />
-                                <TextInput
-                                    placeholder="Full Name"
-                                    placeholderTextColor="#94A3B8"
-                                    style={styles.input}
-                                    value={name}
-                                    onChangeText={setName}
-                                />
-                            </View>
+                            <AuthInput
+                                placeholder="Full Name"
+                                icon="person-outline"
+                                value={name}
+                                onChangeText={setName}
+                            />
                         )}
 
-                        <View style={styles.inputWrapper}>
-                            <Ionicons name="mail-outline" size={20} color="#94A3B8" style={styles.inputIcon} />
-                            <TextInput
-                                placeholder="Email Address"
-                                placeholderTextColor="#94A3B8"
-                                style={styles.input}
-                                value={email}
-                                onChangeText={setEmail}
-                                keyboardType="email-address"
-                                autoCapitalize="none"
-                            />
-                        </View>
+                        <AuthInput
+                            placeholder="Email Address"
+                            icon="mail-outline"
+                            value={email}
+                            onChangeText={setEmail}
+                            keyboardType="email-address"
+                            autoCapitalize="none"
+                        />
 
-                        <View style={styles.inputWrapper}>
-                            <Ionicons name="lock-closed-outline" size={20} color="#94A3B8" style={styles.inputIcon} />
-                            <TextInput
-                                placeholder="Password"
-                                placeholderTextColor="#94A3B8"
-                                style={styles.input}
-                                value={password}
-                                onChangeText={setPassword}
-                                secureTextEntry
-                            />
-                        </View>
+                        <AuthInput
+                            placeholder="Password"
+                            icon="lock-closed-outline"
+                            value={password}
+                            onChangeText={setPassword}
+                            secureTextEntry
+                        />
 
                         {isLogin && (
                             <TouchableOpacity style={styles.forgotPassword}>
@@ -213,26 +201,6 @@ const styles = StyleSheet.create({
     },
     formContainer: {
         paddingHorizontal: 30,
-    },
-    inputWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#F8FAFC',
-        borderRadius: 16,
-        paddingHorizontal: 15,
-        marginBottom: 20,
-        borderWidth: 1,
-        borderColor: '#F1F5F9',
-        height: 58,
-    },
-    inputIcon: {
-        marginRight: 12,
-    },
-    input: {
-        flex: 1,
-        fontSize: 15,
-        color: '#1E293B',
-        fontWeight: '600',
     },
     forgotPassword: {
         alignSelf: 'flex-end',
