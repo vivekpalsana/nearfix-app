@@ -18,6 +18,7 @@ import {
 import { AllServicesModal } from '../../components/AllServicesModal';
 import { BestOffers } from '../../components/BestOffers';
 import { HomeServicesGrid } from '../../components/HomeServicesGrid';
+import { LocationModal } from '../../components/LocationModal';
 import { RecommendedServices } from '../../components/RecommendedServices';
 import { SubServiceModal } from '../../components/SubServiceModal';
 
@@ -29,6 +30,8 @@ const { width, height } = Dimensions.get('window');
 export default function HomeScreen() {
   const [showAllServices, setShowAllServices] = useState(false);
   const [activeService, setActiveService] = useState<string | null>(null);
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [currentLocation, setCurrentLocation] = useState('Home - 123, Street Name...');
 
   const handleServicePress = (serviceName: string) => {
     setActiveService(serviceName);
@@ -61,9 +64,12 @@ export default function HomeScreen() {
 
           <View style={styles.locationContainer}>
             <Text style={styles.locationTitle}>CURRENT LOCATION</Text>
-            <TouchableOpacity style={styles.locationSelector}>
+            <TouchableOpacity
+              style={styles.locationSelector}
+              onPress={() => setShowLocationModal(true)}
+            >
               <Text style={styles.locationText} numberOfLines={1}>
-                Home - 123, Street Name...
+                {currentLocation}
               </Text>
               <Ionicons name="chevron-down" size={16} color="#475569" />
             </TouchableOpacity>
@@ -124,6 +130,13 @@ export default function HomeScreen() {
         onClose={() => setActiveService(null)}
         title={activeService || ''}
         data={activeService ? SUB_SERVICES[activeService] : []}
+      />
+
+      <LocationModal
+        visible={showLocationModal}
+        onClose={() => setShowLocationModal(false)}
+        currentLocation={currentLocation}
+        onSelectLocation={setCurrentLocation}
       />
     </View>
   );

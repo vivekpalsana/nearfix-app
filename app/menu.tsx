@@ -68,7 +68,10 @@ export default function MenuScreen() {
                             key={item.id}
                             entering={FadeInDown.delay(index * 100)}
                         >
-                            <TouchableOpacity style={styles.menuItem}>
+                            <TouchableOpacity
+                                style={styles.menuItem}
+                                onPress={() => router.push(`/${item.id}` as any)}
+                            >
                                 <View style={[styles.iconWrapper, { backgroundColor: item.color }]}>
                                     <Ionicons name={item.icon as any} size={28} color={item.iconColor} />
                                 </View>

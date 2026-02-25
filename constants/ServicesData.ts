@@ -113,7 +113,28 @@ export const SUB_SERVICES: Record<string, any[]> = {
 };
 
 export const OFFERS = [
-    { id: 1, color: '#DBEAFE', title: '50% OFF', subtitle: 'On your first AC service' },
-    { id: 2, color: '#FCE7F3', title: 'Flat ₹200 OFF', subtitle: 'On full house cleaning' },
-    { id: 3, color: '#FEF3C7', title: 'Free Inspection', subtitle: 'On all plumbing works' },
+    {
+        id: 1,
+        color: '#E0F2FE',
+        gradient: ['#E0F2FE', '#BAE6FD'],
+        title: '50% OFF',
+        subtitle: 'On your first AC service',
+        image: { uri: 'https://cdn-icons-png.flaticon.com/512/911/911409.png' }
+    },
+    {
+        id: 2,
+        color: '#FDF2F8',
+        gradient: ['#FDF2F8', '#FBCFE8'],
+        title: 'Flat ₹200 OFF',
+        subtitle: 'On full house cleaning',
+        image: { uri: 'https://cdn-icons-png.flaticon.com/512/2954/2954847.png' }
+    },
+    {
+        id: 3,
+        color: '#FFFBEB',
+        gradient: ['#FFFBEB', '#FEF3C7'],
+        title: 'Free Checkup',
+        subtitle: 'On all plumbing works',
+        image: { uri: 'https://cdn-icons-png.flaticon.com/512/3125/3125381.png' }
+    },
 ];
