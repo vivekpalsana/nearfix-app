@@ -38,6 +38,14 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysPermission": "Allow NearFix to use your location at all times.",
+          "locationWhenInUsePermission": "Allow NearFix to use your location when the app is in use.",
+          "isAndroidBackgroundLocationEnabled": false
+        }
       ]
     ],
     "experiments": {

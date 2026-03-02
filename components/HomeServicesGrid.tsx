@@ -22,7 +22,7 @@ export const HomeServicesGrid: React.FC<HomeServicesGridProps> = ({ services, on
     return (
         <View style={styles.sectionNoPadding}>
             <View style={styles.sectionHeader}>
-                <Text style={styles.sectionTitle}>Home Services</Text>
+                <Text style={styles.sectionTitle}>Our Services</Text>
                 <TouchableOpacity
                     style={styles.seeAllButton}
                     onPress={onSeeAll}

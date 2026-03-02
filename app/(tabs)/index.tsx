@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Location from 'expo-location';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -32,6 +33,44 @@ export default function HomeScreen() {
   const [activeService, setActiveService] = useState<string | null>(null);
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [currentLocation, setCurrentLocation] = useState('Home - 123, Street Name...');
+  const [loadingLocation, setLoadingLocation] = useState(false);
+
+  React.useEffect(() => {
+    (async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status === 'granted') {
+          setLoadingLocation(true);
+          let location;
+          try {
+            location = await Location.getCurrentPositionAsync({
+              accuracy: Location.Accuracy.Balanced,
+            });
+          } catch (innerError) {
+            // Fallback for emulators/slow GPS
+            location = await Location.getLastKnownPositionAsync();
+          }
+
+          if (location) {
+            const reverseGeocode = await Location.reverseGeocodeAsync({
+              latitude: location.coords.latitude,
+              longitude: location.coords.longitude,
+            });
+
+            if (reverseGeocode.length > 0) {
+              const area = reverseGeocode[0];
+              const addressString = `${area.name || ''} ${area.district || ''}, ${area.city || ''}`.trim().replace(/^,|,$/g, '').replace(/, ,/g, ',');
+              setCurrentLocation(addressString || 'Current Location');
+            }
+          }
+        }
+      } catch (error) {
+        console.warn('Error fetching location on mount:', error);
+      } finally {
+        setLoadingLocation(false);
+      }
+    })();
+  }, []);
 
   const handleServicePress = (serviceName: string) => {
     setActiveService(serviceName);
@@ -69,7 +108,7 @@ export default function HomeScreen() {
               onPress={() => setShowLocationModal(true)}
             >
               <Text style={styles.locationText} numberOfLines={1}>
-                {currentLocation}
+                {loadingLocation ? 'Detecting...' : currentLocation}
               </Text>
               <Ionicons name="chevron-down" size={16} color="#475569" />
             </TouchableOpacity>

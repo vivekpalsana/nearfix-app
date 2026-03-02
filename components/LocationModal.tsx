@@ -19,9 +19,9 @@ import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 const { height } = Dimensions.get('window');
 
 const SAVED_ADDRESSES = [
-    { id: 1, type: 'Home', address: '123, Moonlight Apartments, New York, NY', icon: 'home-outline' },
-    { id: 2, type: 'Work', address: '456, Business Square, Tech Park, NY', icon: 'briefcase-outline' },
-    { id: 3, type: 'Other', address: '789, Sunset Boulevard, LA', icon: 'location-outline' },
+    { id: 1, type: 'Home', address: 'at. jambarvala, ta. babra, dist. amreli,365435', icon: 'home-outline' },
+    { id: 2, type: 'Work', address: '505, blueberry, nr. gurukul circle, nikol, ahmedabad, 382350', icon: 'briefcase-outline' },
+    { id: 3, type: 'Other', address: 'shree saurastra patel samaj nikol-naroda, ahmedabad, 382350', icon: 'location-outline' },
 ];
 
 interface LocationModalProps {
@@ -72,9 +72,30 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                 return;
             }
 
-            let location = await Location.getCurrentPositionAsync({
-                accuracy: Location.Accuracy.Balanced,
-            });
+            let location;
+            try {
+                // Try current position with Balanced accuracy
+                location = await Location.getCurrentPositionAsync({
+                    accuracy: Location.Accuracy.Balanced,
+                });
+            } catch (innerError) {
+                // Fallback to last known position if current fails (common on emulators)
+                location = await Location.getLastKnownPositionAsync();
+                if (!location) {
+                    // Final attempt with lower accuracy
+                    try {
+                        location = await Location.getCurrentPositionAsync({
+                            accuracy: Location.Accuracy.Lowest,
+                        });
+                    } catch (finalError) {
+                        throw innerError; // Rethrow original error if everything fails
+                    }
+                }
+            }
+
+            if (!location) {
+                throw new Error('Current location is unavailable');
+            }
 
             // Reverse Geocoding
             const reverseGeocode = await Location.reverseGeocodeAsync({
@@ -92,14 +113,21 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                 onClose();
             }
         } catch (error: any) {
-            console.error(error);
-            if (error.message && error.message.includes('unsatisfied device settings')) {
+            // We use console.warn instead of console.error to avoid the LogBox error screen in development
+            console.warn('Location Fetch Error:', error.message);
+
+            if (error.message && (error.message.includes('unsatisfied device settings') || error.message.includes('unavailable'))) {
                 Alert.alert(
-                    'Location Error',
-                    'Location request failed. Please ensure your GPS is turned on and try again.'
+                    'Location Unavailable',
+                    'Unable to retrieve your current location. Please ensure your GPS is enabled and you have a network connection.',
+                    [{ text: 'OK' }]
                 );
             } else {
-                Alert.alert('Error', 'Could not fetch your location. Please try again or select manually.');
+                Alert.alert(
+                    'Location Error',
+                    'Something went wrong while fetching your location. Please try manually selecting your location.',
+                    [{ text: 'OK' }]
+                );
             }
         } finally {
             setLoading(false);
@@ -173,7 +201,7 @@ export const LocationModal: React.FC<LocationModalProps> = ({
 
                         <View style={styles.divider} />
 
-                        {/* Recent/Saved Addresses */}
+                        {/* Saved Addresses */}
                         <Text style={styles.sectionLabel}>Saved Addresses</Text>
                         {SAVED_ADDRESSES.map((item, index) => (
                             <Animated.View
