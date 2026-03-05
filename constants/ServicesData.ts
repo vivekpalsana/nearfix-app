@@ -137,4 +137,131 @@ export const OFFERS = [
         subtitle: 'On all plumbing works',
         image: { uri: 'https://cdn-icons-png.flaticon.com/512/3125/3125381.png' }
     },
+    {
+        id: 4,
+        color: '#E0F2FE',
+        gradient: ['#1E293B', '#334155'],
+        title: 'Flash Sale',
+        subtitle: 'Rs. 499 - House Cleaning',
+        isExclusive: true,
+        image: { uri: 'https://cdn-icons-png.flaticon.com/512/2954/2954847.png' }
+    },
+    {
+        id: 5,
+        color: '#FDF2F8',
+        gradient: ['#F43F5E', '#FB7185'],
+        title: 'VIP 50%',
+        subtitle: 'Exclusive Salon Package',
+        isExclusive: true,
+        image: { uri: 'https://cdn-icons-png.flaticon.com/512/2707/2707142.png' }
+    },
+    {
+        id: 6,
+        color: '#ECFDF5',
+        gradient: ['#059669', '#10B981'],
+        title: 'Tech Bundle',
+        subtitle: 'Free installation on IT',
+        isExclusive: true,
+        image: { uri: 'https://cdn-icons-png.flaticon.com/512/911/911409.png' }
+    },
 ];
+
+
+export const EXCLUSIVE_OFFERS = [
+    {
+        id: 1,
+        title: 'Super Splash Sale',
+        subtitle: 'Up to 70% OFF on all House Cleaning & Sanitization!',
+        label: 'BEST SELLER',
+        expiry: 'Only 3 hours left!',
+        code: 'SPLASH70',
+        gradient: ['#6366F1', '#8B5CF6'],
+        color: '#6366F1',
+        image: { uri: 'https://cdn-icons-png.flaticon.com/512/2954/2954847.png' }
+    },
+    {
+        id: 2,
+        title: 'VIP Home Care',
+        subtitle: 'Get a dedicated professional for all repairs for 1 month',
+        label: 'PREMIUM',
+        expiry: 'Valid for Prime Members',
+        code: 'PRIMECARE',
+        gradient: ['#F43F5E', '#E11D48'],
+        color: '#F43F5E',
+        image: { uri: 'https://cdn-icons-png.flaticon.com/512/3125/3125381.png' }
+    },
+    {
+        id: 3,
+        title: 'Tech Upgrade',
+        subtitle: 'Flat ₹500 OFF on Laptop, Mobile & IT Services',
+        label: 'HOT DEAL',
+        expiry: 'Ends at Midnight',
+        code: 'TECH500',
+        gradient: ['#10B981', '#059669'],
+        color: '#10B981',
+        image: { uri: 'https://cdn-icons-png.flaticon.com/512/911/911409.png' }
+    },
+    {
+        id: 4,
+        title: 'Glamour Night',
+        subtitle: 'Buy 1 Get 1 Free on all Beauty & Salon Packages',
+        label: 'EXCLUSIVE',
+        expiry: 'Limited Slots',
+        code: 'GLAMOUR',
+        gradient: ['#EC4899', '#DB2777'],
+        color: '#EC4899',
+        image: { uri: 'https://cdn-icons-png.flaticon.com/512/2707/2707142.png' }
+    },
+    {
+        id: 5,
+        title: 'Fresh Air Special',
+        subtitle: 'Flat 40% OFF on AC Deep Cleaning and Gas Refill',
+        label: 'SUMMER SPECIAL',
+        expiry: 'Valid this week',
+        code: 'AIR40',
+        gradient: ['#0EA5E9', '#2563EB'],
+        color: '#0EA5E9',
+        image: { uri: 'https://cdn-icons-png.flaticon.com/512/911/911409.png' }
+    },
+    {
+        id: 6,
+        title: 'Master Chef Plus',
+        subtitle: 'Free chimney service with full kitchen cleaning',
+        label: 'LIMITED',
+        expiry: 'Ends in 48 hours',
+        code: 'KITCHENPRO',
+        gradient: ['#F59E0B', '#D97706'],
+        color: '#F59E0B',
+        image: { uri: 'https://cdn-icons-png.flaticon.com/512/2954/2954847.png' }
+    },
+    {
+        id: 7,
+        title: 'Safe & Secure',
+        subtitle: 'Rs. 200 Discount on all Locksmith & Emergency',
+        label: 'EMERGENCY',
+        expiry: 'Always Available',
+        code: 'SAFEFIX',
+        gradient: ['#64748B', '#1E293B'],
+        color: '#64748B',
+        image: { uri: 'https://cdn-icons-png.flaticon.com/512/3125/3125381.png' }
+    },
+    {
+        id: 8,
+        title: 'Wall Magic',
+        subtitle: 'Get 1 wall texture free with full home painting',
+        label: 'DESIGNER',
+        expiry: 'Festive Season Only',
+        code: 'WALLART',
+        gradient: ['#8B5CF6', '#D946EF'],
+        color: '#8B5CF6',
+        image: { uri: 'https://cdn-icons-png.flaticon.com/512/2707/2707142.png' }
+    }
+
+];
+
+export const ALL_SUB_SERVICES = Object.keys(SUB_SERVICES).flatMap(category =>
+    SUB_SERVICES[category].map(service => ({
+        ...service,
+        category: category
+    }))
+);

@@ -1,6 +1,7 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import React from 'react';
+import React, { useState } from 'react';
 import { Dimensions, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { BookingModal } from './BookingModal';
 
 const { width } = Dimensions.get('window');
 
@@ -20,39 +21,59 @@ interface SubServiceModalProps {
 }
 
 export const SubServiceModal: React.FC<SubServiceModalProps> = ({ visible, onClose, title, data }) => {
-    return (
-        <Modal
-            visible={visible}
-            animationType="fade"
-            transparent={true}
-            onRequestClose={onClose}
-        >
-            <View style={styles.subModalOverlay}>
-                <View style={styles.subModalContent}>
-                    <View style={styles.subModalHeader}>
-                        <View style={styles.titleLine} />
-                        <Text style={styles.subModalTitle}>{title}</Text>
-                        <TouchableOpacity onPress={onClose} style={styles.subModalClose}>
-                            <Ionicons name="close-circle" size={32} color="#94A3B8" />
-                        </TouchableOpacity>
-                    </View>
+    const [bookingVisible, setBookingVisible] = useState(false);
+    const [selectedSubService, setSelectedSubService] = useState<SubService | null>(null);
 
-                    <View style={styles.subServicesGrid}>
-                        {data && data.map((item) => (
-                            <TouchableOpacity key={item.id} style={styles.subServiceItem}>
-                                <View style={[styles.subIconBadge, { backgroundColor: item.color }]}>
-                                    <MaterialCommunityIcons name={item.icon as any} size={36} color={item.iconColor} />
-                                </View>
-                                <Text style={styles.subServiceTitle}>{item.name}</Text>
-                                <View style={styles.bookNowSmall}>
-                                    <Text style={styles.bookNowText}>Book</Text>
-                                </View>
+    const handleSubServicePress = (item: SubService) => {
+        setSelectedSubService(item);
+        setBookingVisible(true);
+    };
+
+    return (
+        <View>
+            <Modal
+                visible={visible}
+                animationType="fade"
+                transparent={true}
+                onRequestClose={onClose}
+            >
+                <View style={styles.subModalOverlay}>
+                    <View style={styles.subModalContent}>
+                        <View style={styles.subModalHeader}>
+                            <View style={styles.titleLine} />
+                            <Text style={styles.subModalTitle}>{title}</Text>
+                            <TouchableOpacity onPress={onClose} style={styles.subModalClose}>
+                                <Ionicons name="close-circle" size={32} color="#94A3B8" />
                             </TouchableOpacity>
-                        ))}
+                        </View>
+
+                        <View style={styles.subServicesGrid}>
+                            {data && data.map((item) => (
+                                <TouchableOpacity
+                                    key={item.id}
+                                    style={styles.subServiceItem}
+                                    onPress={() => handleSubServicePress(item)}
+                                >
+                                    <View style={[styles.subIconBadge, { backgroundColor: item.color }]}>
+                                        <MaterialCommunityIcons name={item.icon as any} size={36} color={item.iconColor} />
+                                    </View>
+                                    <Text style={styles.subServiceTitle}>{item.name}</Text>
+                                    <View style={styles.bookNowSmall}>
+                                        <Text style={styles.bookNowText}>Book</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
                     </View>
                 </View>
-            </View>
-        </Modal>
+            </Modal>
+
+            <BookingModal
+                visible={bookingVisible}
+                onClose={() => setBookingVisible(false)}
+                subService={selectedSubService}
+            />
+        </View>
     );
 };
 

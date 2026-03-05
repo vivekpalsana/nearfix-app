@@ -11,11 +11,12 @@ import {
     View,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { useAuthStore } from '../hooks/useAuthStore';
 
 const MENU_ITEMS = [
     {
         id: 'help',
-        title: 'Help Us',
+        title: 'Help',
         subtitle: 'Get support or report an issue',
         icon: 'help-circle-outline',
         color: '#E0F2FE',
@@ -48,6 +49,8 @@ const MENU_ITEMS = [
 ];
 
 export default function MenuScreen() {
+    const { isLoggedIn, user } = useAuthStore();
+
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="dark-content" />
@@ -62,6 +65,30 @@ export default function MenuScreen() {
             </View>
 
             <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+                {/* Profile Section */}
+                {isLoggedIn && (
+                    <Animated.View entering={FadeInDown.delay(50)} style={styles.profileSection}>
+                        <TouchableOpacity
+                            style={styles.profileCard}
+                            onPress={() => router.push('/auth')}
+                        >
+                            <View style={styles.profileAvatar}>
+                                <Ionicons name="person-circle" size={60} color="#38BDF8" />
+                            </View>
+                            <View style={styles.profileInfo}>
+                                <Text style={styles.profileName}>{user?.name}</Text>
+                                <Text style={styles.profileSubtitle}>{user?.email}</Text>
+                            </View>
+                            <TouchableOpacity
+                                style={styles.loginActionBtn}
+                                onPress={() => router.push('/auth')}
+                            >
+                                <Text style={styles.loginActionText}>View Profile</Text>
+                            </TouchableOpacity>
+                        </TouchableOpacity>
+                    </Animated.View>
+                )}
+
                 <View style={styles.menuList}>
                     {MENU_ITEMS.map((item, index) => (
                         <Animated.View
@@ -89,8 +116,8 @@ export default function MenuScreen() {
 
                 {/* Footer Info */}
                 <View style={styles.footer}>
-                    <Text style={styles.versionText}>NearFix v1.0.0</Text>
-                    <Text style={styles.copyrightText}>© 2024 NearFix App. All rights reserved.</Text>
+                    <Text style={styles.versionText}>NearFix v1.0.1</Text>
+                    <Text style={styles.copyrightText}>© 2026 NearFix App. All rights reserved.</Text>
                 </View>
             </ScrollView>
         </SafeAreaView>
@@ -182,5 +209,50 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: '#CBD5E1',
         marginTop: 4,
+    },
+    profileSection: {
+        marginBottom: 25,
+    },
+    profileCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#F8FAFC',
+        padding: 20,
+        borderRadius: 28,
+        borderWidth: 1,
+        borderColor: '#F1F5F9',
+    },
+    profileAvatar: {
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        backgroundColor: '#FFFFFF',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    profileInfo: {
+        flex: 1,
+        marginLeft: 15,
+    },
+    profileName: {
+        fontSize: 18,
+        fontWeight: '900',
+        color: '#1E293B',
+    },
+    profileSubtitle: {
+        fontSize: 13,
+        color: '#64748B',
+        marginTop: 2,
+    },
+    loginActionBtn: {
+        backgroundColor: '#38BDF8',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 12,
+    },
+    loginActionText: {
+        color: '#FFFFFF',
+        fontSize: 12,
+        fontWeight: '800',
     },
 });

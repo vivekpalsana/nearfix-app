@@ -46,6 +46,12 @@
           "locationWhenInUsePermission": "Allow NearFix to use your location when the app is in use.",
           "isAndroidBackgroundLocationEnabled": false
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share problem images."
+        }
       ]
     ],
     "experiments": {
