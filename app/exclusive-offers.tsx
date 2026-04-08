@@ -14,6 +14,7 @@ import {
     View,
 } from 'react-native';
 import Animated, { FadeInDown, FadeInRight } from 'react-native-reanimated';
+import { useAuthStore } from '../hooks/useAuthStore';
 import { BookingModal } from '../components/BookingModal';
 import { EXCLUSIVE_OFFERS } from '../constants/ServicesData';
 
@@ -21,8 +22,13 @@ const { width } = Dimensions.get('window');
 
 export default function ExclusiveOffersScreen() {
     const [bookingService, setBookingService] = React.useState<any>(null);
+    const { isLoggedIn } = useAuthStore();
 
     const handleClaim = (offer: any) => {
+        if (!isLoggedIn) {
+            router.push('/auth');
+            return;
+        }
         setBookingService({
             id: offer.id,
             name: offer.title,

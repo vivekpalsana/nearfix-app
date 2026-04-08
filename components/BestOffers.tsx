@@ -22,8 +22,8 @@ interface BestOffersProps {
 
 export const BestOffers: React.FC<BestOffersProps> = ({ offers, onViewAll, onClaim }) => {
     return (
-        <View style={styles.section} pointerEvents="box-none">
-            <View style={styles.headerRow} pointerEvents="box-none">
+        <View style={styles.section}>
+            <View style={styles.headerRow}>
                 <Text style={styles.sectionTitle}>Exclusive Offers</Text>
                 <TouchableOpacity
                     onPress={() => {

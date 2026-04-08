@@ -28,16 +28,23 @@ export default function SplashScreen({ onAnimationComplete }: SplashScreenProps)
         // Subtle rotation during entrance
         rotation.value = withTiming(360, { duration: 1500, easing: Easing.out(Easing.exp) });
 
-        // Auto cleanup
-        const timeout = setTimeout(() => {
+        // Auto cleanup - Fade out and exit
+        const animationTimeout = setTimeout(() => {
             opacity.value = withTiming(0, { duration: 800 }, (finished) => {
-                if (finished) {
-                    runOnJS(onAnimationComplete)();
-                }
+                // Ensure we always trigger complete even if interrupted
+                runOnJS(onAnimationComplete)();
             });
-        }, 3500);
+        }, 3000);
 
-        return () => clearTimeout(timeout);
+        // Fail-safe: Force complete after 5 seconds no matter what
+        const failSafeTimeout = setTimeout(() => {
+            runOnJS(onAnimationComplete)();
+        }, 5000);
+
+        return () => {
+            clearTimeout(animationTimeout);
+            clearTimeout(failSafeTimeout);
+        };
     }, []);
 
     const logoAnimatedStyle = useAnimatedStyle(() => ({

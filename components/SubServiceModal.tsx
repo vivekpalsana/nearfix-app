@@ -1,6 +1,8 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { Dimensions, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useAuthStore } from '../hooks/useAuthStore';
 import { BookingModal } from './BookingModal';
 
 const { width } = Dimensions.get('window');
@@ -23,8 +25,14 @@ interface SubServiceModalProps {
 export const SubServiceModal: React.FC<SubServiceModalProps> = ({ visible, onClose, title, data }) => {
     const [bookingVisible, setBookingVisible] = useState(false);
     const [selectedSubService, setSelectedSubService] = useState<SubService | null>(null);
+    const { isLoggedIn } = useAuthStore();
 
     const handleSubServicePress = (item: SubService) => {
+        if (!isLoggedIn) {
+            onClose(); // Close the modal before redirecting
+            router.push('/auth');
+            return;
+        }
         setSelectedSubService(item);
         setBookingVisible(true);
     };

@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
+    ActivityIndicator,
     Alert, BackHandler,
     Dimensions,
     KeyboardAvoidingView,
@@ -17,14 +18,20 @@ import {
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
 import { AuthInput } from '../components/AuthInput';
 import { useAuthStore } from '../hooks/useAuthStore';
+import { authApi } from '../services/auth';
 
 const { width } = Dimensions.get('window');
 
 export default function AuthScreen() {
     const [isLogin, setIsLogin] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    
+    // For signup context
     const [name, setName] = useState('');
+    const [businessName, setBusinessName] = useState('');
+    const [userRole, setUserRole] = useState<'customer' | 'provider'>('customer');
     const { login, isLoggedIn, user, logout } = useAuthStore();
 
     useEffect(() => {
@@ -51,43 +58,89 @@ export default function AuthScreen() {
 
     const toggleAuth = () => {
         setIsLogin(!isLogin);
+        setPassword('');
+        setEmail('');
     };
 
-    const handleAuth = () => {
-        if (isLogin) {
-            if (!email || !password) {
-                Alert.alert('Error', 'Please fill in all fields');
-                return;
+    const validateEmail = (email: string) => {
+        return /\S+@\S+\.\S+/.test(email);
+    };
+
+    const handleAuth = async () => {
+        if (!email || !password) {
+            Alert.alert('Required', 'Please fill in all fields.');
+            return;
+        }
+
+        if (!validateEmail(email)) {
+            Alert.alert('Invalid Email', 'Please enter a valid email address.');
+            return;
+        }
+
+        if (password.length < 6) {
+            Alert.alert('Password Too Short', 'Password must be at least 6 characters.');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            if (isLogin) {
+                try {
+                    const response = await authApi.login({ email, password });
+                    login(response.user as any, response.token);
+                    if (response.user.role === 'provider') {
+                        router.replace('/provider-dashboard');
+                    } else {
+                        router.replace('/(tabs)');
+                    }
+                } catch (err: any) {
+                    if (err.response?.status === 400 || err.response?.status === 404) {
+                        Alert.alert(
+                            'Access Denied', 
+                            'No account found or invalid credentials. If you are a new user, please Sign Up first.',
+                            [
+                                { text: 'Try Again' },
+                                { text: 'Sign Up', onPress: () => setIsLogin(false) }
+                            ]
+                        );
+                    } else {
+                        throw err;
+                    }
+                }
+            } else {
+                if (!name) {
+                    Alert.alert('Required', 'Please enter your full name.');
+                    setLoading(false);
+                    return;
+                }
+                const response = await authApi.register({
+                    name: userRole === 'provider' && businessName ? businessName : name,
+                    email,
+                    password,
+                    role: userRole
+                });
+                Alert.alert('Success', 'Account created successfully!', [
+                    { text: 'Continue', onPress: () => {
+                        login(response.user as any, response.token);
+                        if (response.user.role === 'provider') {
+                            router.replace('/provider-dashboard');
+                        } else {
+                            router.replace('/(tabs)');
+                        }
+                    }}
+                ]);
             }
-            // Simulate Login
-            login({
-                id: '1',
-                name: 'Vivek Palsana',
-                email: email,
-                avatar: 'https://i.pravatar.cc/150?u=vivek'
-            });
-            Alert.alert('Success', 'Welcome back, Vivek!');
-            router.replace('/(tabs)');
-        } else {
-            if (!name || !email || !password) {
-                Alert.alert('Error', 'Please fill in all fields');
-                return;
-            }
-            // Simulate Sign Up
-            login({
-                id: '1',
-                name: name,
-                email: email,
-                avatar: `https://i.pravatar.cc/150?u=${name}`
-            });
-            Alert.alert('Success', `Welcome to NearFix, ${name}!`);
-            router.replace('/(tabs)');
+        } catch (error: any) {
+            console.error('Auth Error:', error);
+            const errorMsg = error.response?.data?.message || 'Server connection failed. Please check your internet or try again later.';
+            Alert.alert('Error', errorMsg);
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleLogout = () => {
         logout();
-        Alert.alert('Success', 'Logged out successfully');
     };
 
     return (
@@ -105,17 +158,37 @@ export default function AuthScreen() {
                         </TouchableOpacity>
                     </View>
 
+                    {/* Role Toggle */}
+                    {!isLoggedIn && (
+                        <Animated.View entering={FadeInDown.delay(100)} style={styles.roleToggleContainer}>
+                            <View style={styles.roleToggle}>
+                                <TouchableOpacity
+                                    style={[styles.roleTab, userRole === 'customer' && styles.roleTabActive]}
+                                    onPress={() => setUserRole('customer')}
+                                >
+                                    <Text style={[styles.roleTabText, userRole === 'customer' && styles.roleTabTextActive]}>Customer</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[styles.roleTab, userRole === 'provider' && styles.roleTabActive]}
+                                    onPress={() => setUserRole('provider')}
+                                >
+                                    <Text style={[styles.roleTabText, userRole === 'provider' && styles.roleTabTextActive]}>Provider</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </Animated.View>
+                    )}
+
                     {/* Header Section */}
                     <View style={styles.headerSection}>
                         <Animated.Text entering={FadeInDown.delay(200)} style={styles.title}>
-                            {isLoggedIn ? `Hello, ${user?.name}!` : (isLogin ? 'Welcome Back!' : 'Create Account')}
+                            {isLoggedIn ? `Hello, ${user?.name}!` : (isLogin ? 'Welcome Back!' : (userRole === 'provider' ? 'Partner With Us' : 'Create Account'))}
                         </Animated.Text>
                         <Animated.Text entering={FadeInDown.delay(300)} style={styles.subtitle}>
                             {isLoggedIn
                                 ? 'You are currently signed in to your account'
                                 : (isLogin
                                     ? 'Sign in to your account to continue'
-                                    : 'Join NearFix to find your perfect repair partner')}
+                                    : (userRole === 'provider' ? 'Join NearFix to grow your service business' : 'Join NearFix to find your perfect repair partner'))}
                         </Animated.Text>
                     </View>
 
@@ -131,42 +204,71 @@ export default function AuthScreen() {
                                 />
                             )}
 
-                            <AuthInput
-                                placeholder="Email Address"
-                                icon="mail-outline"
-                                value={email}
-                                onChangeText={setEmail}
-                                keyboardType="email-address"
-                                autoCapitalize="none"
-                            />
-
-                            <AuthInput
-                                placeholder="Password"
-                                icon="lock-closed-outline"
-                                value={password}
-                                onChangeText={setPassword}
-                                secureTextEntry
-                            />
-
-                            {isLogin && (
-                                <TouchableOpacity style={styles.forgotPassword}>
-                                    <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-                                </TouchableOpacity>
+                            {!isLogin && userRole === 'provider' && (
+                                <AuthInput
+                                    placeholder="Business Name (Optional)"
+                                    icon="briefcase-outline"
+                                    value={businessName}
+                                    onChangeText={setBusinessName}
+                                />
                             )}
 
-                            <TouchableOpacity style={styles.mainButton} onPress={handleAuth}>
-                                <Text style={styles.mainButtonText}>
-                                    {isLogin ? 'Sign In' : 'Sign Up'}
-                                </Text>
+                            <View>
+                                <AuthInput
+                                    placeholder="Email Address"
+                                    icon="mail-outline"
+                                    value={email}
+                                    onChangeText={setEmail}
+                                    keyboardType="email-address"
+                                    autoCapitalize="none"
+                                />
+                                <AuthInput
+                                    placeholder="Password"
+                                    icon="lock-closed-outline"
+                                    value={password}
+                                    onChangeText={setPassword}
+                                    secureTextEntry
+                                />
+                                {isLogin && (
+                                    <TouchableOpacity style={styles.forgotPassword}>
+                                        <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+
+                            <TouchableOpacity 
+                                style={[styles.mainButton, loading && { opacity: 0.7 }]} 
+                                onPress={handleAuth}
+                                disabled={loading}
+                            >
+                                {loading ? (
+                                    <ActivityIndicator color="#FFFFFF" />
+                                ) : (
+                                    <Text style={styles.mainButtonText}>
+                                        {isLogin ? 'Sign In' : 'Sign Up'}
+                                    </Text>
+                                )}
                             </TouchableOpacity>
+
+
                         </Animated.View>
                     ) : (
                         <View style={styles.loggedInContainer}>
                             <View style={styles.profileBadge}>
                                 <Ionicons name="person-circle" size={80} color="#38BDF8" />
                                 <Text style={styles.profileName}>{user?.name}</Text>
-                                <Text style={styles.profileEmail}>{user?.email}</Text>
+                                <Text style={styles.profileEmail}>{user?.phone || user?.email}</Text>
                             </View>
+
+                            {user?.role === 'provider' && (
+                                <TouchableOpacity 
+                                    style={[styles.mainButton, { backgroundColor: '#1E293B', shadowColor: '#1E293B', marginBottom: 15 }]} 
+                                    onPress={() => router.replace('/provider-dashboard')}
+                                >
+                                    <Text style={styles.mainButtonText}>Switch to Provider Dashboard</Text>
+                                </TouchableOpacity>
+                            )}
+
                             <TouchableOpacity style={[styles.mainButton, { backgroundColor: '#EF4444', shadowColor: '#EF4444' }]} onPress={handleLogout}>
                                 <Text style={styles.mainButtonText}>Logout</Text>
                             </TouchableOpacity>
@@ -204,6 +306,14 @@ export default function AuthScreen() {
                                     </Text>
                                 </TouchableOpacity>
                             </View>
+
+                            {/* Hidden Admin Entry */}
+                            <TouchableOpacity 
+                                style={{ marginTop: 25, opacity: 0.3 }} 
+                                onPress={() => router.push('/admin/login')}
+                            >
+                                <Text style={[styles.footerText, { fontSize: 11 }]}>Admin Portal</Text>
+                            </TouchableOpacity>
                         </Animated.View>
                     )}
                 </ScrollView>
@@ -237,6 +347,39 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderWidth: 1,
         borderColor: '#F1F5F9',
+    },
+    roleToggleContainer: {
+        paddingHorizontal: 30,
+        marginTop: 10,
+    },
+    roleToggle: {
+        flexDirection: 'row',
+        backgroundColor: '#F1F5F9',
+        borderRadius: 16,
+        padding: 4,
+    },
+    roleTab: {
+        flex: 1,
+        paddingVertical: 12,
+        alignItems: 'center',
+        borderRadius: 12,
+    },
+    roleTabActive: {
+        backgroundColor: '#FFFFFF',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 5,
+        elevation: 2,
+    },
+    roleTabText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#64748B',
+    },
+    roleTabTextActive: {
+        color: '#0EA5E9',
+        fontWeight: '800',
     },
     headerSection: {
         paddingHorizontal: 30,

@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import * as Location from 'expo-location';
 import React, { useState } from 'react';
 import {
@@ -15,8 +16,9 @@ import {
     View,
 } from 'react-native';
 import Animated, { FadeInDown, FadeInUp } from 'react-native-reanimated';
+import { AddressPicker } from './AddressPicker';
 
-const { height } = Dimensions.get('window');
+const { height, width } = Dimensions.get('window');
 
 const SAVED_ADDRESSES = [
     { id: 1, type: 'Home', address: 'at. jambarvala, ta. babra, dist. amreli,365435', icon: 'home-outline' },
@@ -38,6 +40,12 @@ export const LocationModal: React.FC<LocationModalProps> = ({
     onSelectLocation,
 }) => {
     const [loading, setLoading] = useState(false);
+    const [isPickingAddress, setIsPickingAddress] = useState(false);
+
+    const handleCloseModal = () => {
+        setIsPickingAddress(false);
+        onClose();
+    };
 
     const handleGetCurrentLocation = async () => {
         setLoading(true);
@@ -139,14 +147,24 @@ export const LocationModal: React.FC<LocationModalProps> = ({
             visible={visible}
             transparent
             animationType="fade"
-            onRequestClose={onClose}
+            onRequestClose={handleCloseModal}
         >
             <View style={styles.overlay}>
-                <TouchableOpacity
-                    style={styles.dismissArea}
-                    activeOpacity={1}
-                    onPress={onClose}
-                />
+                {isPickingAddress ? (
+                    <AddressPicker 
+                        onBack={() => setIsPickingAddress(false)}
+                        onSelectAddress={(addr) => {
+                            onSelectLocation(addr);
+                            handleCloseModal();
+                        }}
+                    />
+                ) : (
+                    <>
+                    <TouchableOpacity
+                        style={StyleSheet.absoluteFill}
+                        activeOpacity={1}
+                        onPress={handleCloseModal}
+                    />
 
                 <Animated.View
                     entering={FadeInUp.duration(400)}
@@ -232,12 +250,22 @@ export const LocationModal: React.FC<LocationModalProps> = ({
 
                     {/* Footer */}
                     <View style={styles.footer}>
-                        <TouchableOpacity style={styles.addAddressBtn}>
+                        <TouchableOpacity 
+                            style={styles.addAddressBtn}
+                            onPress={() => {
+                                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                setIsPickingAddress(true);
+                            }}
+                            activeOpacity={0.7}
+                            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                        >
                             <Ionicons name="add" size={20} color="#FFF" />
                             <Text style={styles.addAddressText}>Add New Address</Text>
                         </TouchableOpacity>
                     </View>
                 </Animated.View>
+                </>
+                )}
             </View>
         </Modal>
     );

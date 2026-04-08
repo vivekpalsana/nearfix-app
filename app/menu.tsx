@@ -61,7 +61,7 @@ export default function MenuScreen() {
                     <Ionicons name="arrow-back" size={24} color="#1E293B" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Menu</Text>
-                <View style={{ width: 40 }} /> {/* Spacer for centering */}
+                <View style={{ width: 40 }} />
             </View>
 
             <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>

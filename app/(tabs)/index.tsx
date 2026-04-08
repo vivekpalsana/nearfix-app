@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 import { useAuthStore } from '../../hooks/useAuthStore';
 
-// Components
+
 import { AllServicesModal } from '../../components/AllServicesModal';
 import { BestOffers } from '../../components/BestOffers';
 import { BookingModal } from '../../components/BookingModal';
@@ -26,7 +26,7 @@ import { LocationModal } from '../../components/LocationModal';
 import { RecommendedServices } from '../../components/RecommendedServices';
 import { SubServiceModal } from '../../components/SubServiceModal';
 
-// Constants
+
 import { OFFERS, SERVICES, SUB_SERVICES } from '../../constants/ServicesData';
 
 const { width, height } = Dimensions.get('window');
@@ -46,7 +46,7 @@ export default function HomeScreen() {
 
   const onRefresh = React.useCallback(() => {
     setRefreshing(true);
-    // Simulate a network request
+    // refresh network request
     setTimeout(() => {
       setRefreshKey(prev => prev + 1);
       setRefreshing(false);
@@ -62,10 +62,10 @@ export default function HomeScreen() {
           let location;
           try {
             location = await Location.getCurrentPositionAsync({
-              accuracy: Location.Accuracy.Balanced,
+              accuracy: Location.Accuracy.Lowest,
             });
           } catch (innerError) {
-            // Fallback for emulators/slow GPS
+            // for emulators/slow GPS
             location = await Location.getLastKnownPositionAsync();
           }
 
@@ -91,6 +91,10 @@ export default function HomeScreen() {
   }, []);
 
   const handleServicePress = (serviceName: string) => {
+    if (!isLoggedIn) {
+      router.push('/auth');
+      return;
+    }
     setActiveService(serviceName);
     setSearchQuery('');
     setSearchResults([]);
@@ -118,10 +122,18 @@ export default function HomeScreen() {
         });
       });
 
-      setSearchResults(results.slice(0, 10)); // Limit results
+      setSearchResults(results.slice(0, 10)); 
     } else {
       setSearchResults([]);
     }
+  };
+
+  const handleBookingPress = (service: any) => {
+    if (!isLoggedIn) {
+      router.push('/auth');
+      return;
+    }
+    setDirectBookingService(service);
   };
 
   return (
@@ -140,7 +152,7 @@ export default function HomeScreen() {
       </View>
 
 
-      <SafeAreaView style={{ flex: 1 }} pointerEvents="box-none">
+      <SafeAreaView style={{ flex: 1 }}>
 
         {/* Header */}
         <View style={styles.header}>
@@ -170,14 +182,17 @@ export default function HomeScreen() {
             style={styles.profileButton}
             onPress={() => router.push('/auth')}
           >
-            <Ionicons name="person-circle-outline" size={32} color="#1E293B" />
+            <View style={styles.profileContent}>
+              {!isLoggedIn && <Text style={styles.loginHint}>Log In</Text>}
+              <Ionicons name="person-circle-outline" size={32} color="#1E293B" />
+            </View>
           </TouchableOpacity>
         </View>
 
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
-          pointerEvents="box-none"
+          nestedScrollEnabled={true}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -254,28 +269,13 @@ export default function HomeScreen() {
                 console.log('Navigating to exclusive offers screen');
                 router.push('/exclusive-offers');
               }}
-              onClaim={(offer) => setDirectBookingService(offer)}
-            />
-            {/* Fallback invisible button if the internal one is blocked */}
-            <TouchableOpacity
-              onPress={() => {
-                console.log('Fallback navigation triggered');
-                router.push('/exclusive-offers');
-              }}
-              style={{
-                position: 'absolute',
-                top: 0,
-                right: 0,
-                width: 100,
-                height: 50,
-                backgroundColor: 'rgba(0,0,0,0)', // Invisible but clickable
-              }}
+              onClaim={(offer) => handleBookingPress(offer)}
             />
           </View>
 
           {/* Recommended Section */}
           <RecommendedServices
-            onBookNow={(service) => setDirectBookingService(service)}
+            onBookNow={(service) => handleBookingPress(service)}
             refreshKey={refreshKey}
           />
 
@@ -365,6 +365,16 @@ const styles = StyleSheet.create({
   },
   profileButton: {
     padding: 2,
+  },
+  profileContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  loginHint: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#0EA5E9',
   },
   scrollContent: {
     paddingBottom: 20,
